@@ -8,6 +8,17 @@ Issues and specs live as GitHub issues, managed with the `gh` CLI. See `docs/age
 
 Single-context: one `CONTEXT.md` at the repo root plus `docs/adr/`. See `docs/agents/domain.md`.
 
+### GitHub auth
+
+Writes to `mhuang74-blog` repos — opening or editing pull requests, PR comments — use the fine-grained token in `GITHUB_PAT_MHUANG74BLOG` (`~/.zshrc`, single-quoted), passed per command as `GH_TOKEN`:
+
+```sh
+v=$(grep -m1 '^GITHUB_PAT_MHUANG74BLOG=' ~/.zshrc); v=${v#*=}; v=${v#\'}; v=${v%\'}
+GH_TOKEN="$v" gh pr create --base master --head <branch>
+```
+
+The stored credential in `~/.config/gh/hosts.yml` covers reads (`gh pr list`, `gh api`) and git pushes over SSH, and answers the pull-request write endpoints with `403 Resource not accessible by personal access token`. Keep `GH_TOKEN` scoped to the command so `hosts.yml` stays the default.
+
 <!-- BEGIN:nextjs-agent-rules -->
 
 ## This is NOT the Next.js you know
