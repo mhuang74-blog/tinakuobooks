@@ -1,31 +1,20 @@
-# OS X
+# OS
 .DS_Store
 
-# Jekyll build
-/_site/
-.jekyll-metadata
-#Gemfile.lock
+# dependencies
+node_modules
 
-# webstorm
+# Next.js output
+.next/
+out/
+
+# tests
+playwright-report/
+test-results/
+
+# editor
 .idea/
-
-# others
 *.swp
 
-# site build
-*.gem
-*.rbc
-.bundle
-.config
-coverage
-InstalledFiles
-lib/bundler/man
-pkg
-rdoc
-spec/reports
-test/tmp
-test/version_tmp
-tmp
-vendor
-Gemfile.lock
-node_modules
+# TypeScript
+*.tsbuildinfo

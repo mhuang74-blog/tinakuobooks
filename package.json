@@ -1,54 +1,45 @@
 {
-    "name": "casper",
-    "description": "The default personal blogging theme for Ghost. Beautiful, minimal and responsive.",
-    "demo": "https://demo.ghost.io",
-    "version": "2.1.9",
-    "engines": {
-        "ghost": ">=1.2.0"
-    },
-    "license": "MIT",
-    "screenshots": {
-        "desktop": "assets/screenshot-desktop.jpg",
-        "mobile": "assets/screenshot-mobile.jpg"
-    },
-    "author": {
-        "name": "Ghost Foundation",
-        "email": "hello@ghost.org",
-        "url": "https://ghost.org"
-    },
-    "gpm": {
-        "type": "theme",
-        "categories": [
-            "Minimal",
-            "Magazine"
-        ]
-    },
-    "keywords": [
-        "ghost",
-        "theme"
-    ],
-    "repository": {
-        "type": "git",
-        "url": "https://github.com/TryGhost/Casper.git"
-    },
-    "bugs": "https://github.com/TryGhost/Casper/issues",
-    "contributors": "https://github.com/TryGhost/Casper/graphs/contributors",
-    "devDependencies": {
-        "autoprefixer": "6.3.6",
-        "cssnano": "3.7.1",
-        "gulp": "^3.9.1",
-        "gulp-livereload": "3.8.1",
-        "gulp-nodemon": "2.1.0",
-        "gulp-postcss": "6.1.1",
-        "gulp-sourcemaps": "1.6.0",
-        "gulp-util": "3.0.7",
-        "gulp-watch": "4.3.8",
-        "gulp-zip": "4.0.0",
-        "postcss-color-function": "2.0.1",
-        "postcss-custom-properties": "5.0.1",
-        "postcss-easy-import": "1.0.1"
-    },
-    "config": {
-        "posts_per_page": 25
-    }
+  "name": "tinakuobooks",
+  "version": "1.0.0",
+  "private": true,
+  "description": "Bilingual portfolio for the works of Tina Kuo, statically exported with Next.js",
+  "license": "CC-BY-4.0",
+  "engines": {
+    "node": ">=20.9.0"
+  },
+  "scripts": {
+    "dev": "next dev",
+    "build": "next build",
+    "prebuild": "tsx scripts/validate-content.ts",
+    "postbuild": "node scripts/postbuild.mjs",
+    "start": "serve out -l 3000",
+    "lint": "eslint .",
+    "typecheck": "tsc --noEmit",
+    "test:e2e": "playwright test",
+    "images": "node scripts/optimize-images.mjs"
+  },
+  "dependencies": {
+    "gray-matter": "4.0.3",
+    "motion": "14.14.0",
+    "next": "16.4.6",
+    "react": "19.3.1",
+    "react-dom": "19.3.1",
+    "react-markdown": "10.1.0",
+    "remark-gfm": "4.0.1"
+  },
+  "devDependencies": {
+    "@playwright/test": "1.65.1",
+    "@tailwindcss/postcss": "4.3.5",
+    "@tailwindcss/typography": "0.5.20",
+    "@types/node": "22.20.5",
+    "@types/react": "19.3.0",
+    "@types/react-dom": "19.3.0",
+    "eslint": "10.15.0",
+    "eslint-config-next": "16.4.6",
+    "serve": "14.2.8",
+    "sharp": "0.35.5",
+    "tailwindcss": "4.3.5",
+    "tsx": "4.23.15",
+    "typescript": "^6.0.3"
+  }
 }
