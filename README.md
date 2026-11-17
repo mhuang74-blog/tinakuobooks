@@ -7,22 +7,22 @@ GitHub Pages — no server runtime, no CMS, no image optimizer service.
 ## Requirements
 
 - Node.js 22 (`>=20.9.0` is the hard floor for Next 16 and `sharp`)
-- npm 10+
+- pnpm 10 (`corepack enable pnpm`, pinned via `packageManager`)
 
 ## Commands
 
 ```bash
-npm install          # install dependencies
-npm run dev          # local dev server on http://localhost:3000
-npm run build        # content validation, static export, legacy URL post-processing
-npm run start        # serve the exported out/ directory on port 3000
-npm run lint         # eslint
-npm run typecheck    # tsc --noEmit
-npm run test:e2e     # Playwright suite (builds and serves automatically)
-npm run images       # regenerate WebP covers, OG images, and the legacy PDF copy
+pnpm install          # install dependencies
+pnpm run dev          # local dev server on http://localhost:3000
+pnpm run build        # content validation, static export, legacy URL post-processing
+pnpm run start        # serve the exported out/ directory on port 3000
+pnpm run lint         # eslint
+pnpm run typecheck    # tsc --noEmit
+pnpm run test:e2e     # Playwright suite (builds and serves automatically)
+pnpm run images       # regenerate WebP covers, OG images, and the legacy PDF copy
 ```
 
-`npm run build` runs two extra steps:
+`pnpm run build` runs two extra steps:
 
 1. `prebuild` → `scripts/validate-content.ts` fails the build on broken front
    matter, duplicate English slugs, missing covers, or stale `<!--more-->`
@@ -85,7 +85,7 @@ routes (`/works`, `/collections`, `/en/**`) use `next/link`.
 ## Images
 
 `assets/source-images/` holds the originals and is not deployed.
-`npm run images` writes:
+`pnpm run images` writes:
 
 - `public/images/<name>.webp` — max width 1600 (800 for author photos)
 - `public/og/<name>.jpg` — 1200×630 Open Graph cards for covers and the homepage
@@ -97,8 +97,8 @@ The generated files are committed. Re-run the script when adding new artwork.
 
 `.github/workflows/deploy.yml` runs on every push to `master`:
 
-1. `verify`: `npm ci`, lint, typecheck, build, Playwright against the exported
-   site.
+1. `verify`: `pnpm install --frozen-lockfile`, lint, typecheck, build, Playwright
+   against the exported site.
 2. `deploy`: rebuilds and publishes `out/` to the `gh-pages` branch with the
    `www.tinakuobooks.com` CNAME.
 

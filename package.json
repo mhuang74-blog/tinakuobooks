@@ -2,6 +2,7 @@
   "name": "tinakuobooks",
   "version": "1.0.0",
   "private": true,
+  "packageManager": "pnpm@10.24.0",
   "description": "Bilingual portfolio for the works of Tina Kuo, statically exported with Next.js",
   "license": "CC-BY-4.0",
   "engines": {
