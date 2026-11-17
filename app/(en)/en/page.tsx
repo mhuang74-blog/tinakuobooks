@@ -31,7 +31,6 @@ export default function EnHomePage() {
   const works = getTranslatedWorks()
   const featured = works.find((work) => work.featured) ?? works[0]
   const rest = works.filter((work) => work.slug !== featured.slug)
-  const stack = [featured, ...rest.slice(0, 2)]
   const latest = rest.slice(0, 6)
   const featuredCollection = getCollection(featured.collectionId)
   const translatedByCollection = (id: (typeof collections)[number]['id']) =>
@@ -41,51 +40,41 @@ export default function EnHomePage() {
     <>
       <JsonLd data={websiteJsonLd('en')} />
 
-      <section className="u-container pt-12 sm:pt-16">
-        <div className="grid items-center gap-10 lg:grid-cols-[1.05fr_1fr]">
-          <div className="hero-rise">
-            <p className="u-eyebrow">{SITE_TITLE_EN}</p>
-            <h1 className="u-display mt-4 text-4xl leading-tight sm:text-5xl lg:text-6xl">
+      <section className="relative isolate overflow-hidden bg-paper-deep">
+        <img
+          src="/images/blog-cover-tina.webp"
+          alt="Tina Kuo"
+          width={1600}
+          height={1067}
+          className="absolute inset-0 -z-10 h-full w-full object-cover object-center"
+        />
+        <div aria-hidden="true" className="absolute inset-0 -z-10 splash-scrim" />
+        <div className="u-container flex min-h-[64svh] items-end pb-14 pt-32 sm:min-h-[72svh] sm:pb-20">
+          <div className="hero-rise max-w-2xl">
+            <p className="text-xs uppercase tracking-[0.18em] text-paper/80">
+              {SITE_TITLE_EN}
+            </p>
+            <h1 className="u-display mt-4 text-4xl leading-tight text-paper sm:text-5xl lg:text-6xl">
               {SITE_DESCRIPTION_EN}
             </h1>
-            <p className="mt-5 max-w-xl text-lg leading-relaxed text-ink-muted">
+            <p className="mt-5 max-w-xl text-lg leading-relaxed text-paper/85">
               Books, picture books, and stage stories by Tina Kuo — collected and
               extended by her family.
             </p>
             <div className="mt-8 flex flex-wrap gap-3">
               <Link
                 href="/en/works"
-                className="u-focus inline-flex h-12 items-center rounded-full bg-shell px-6 text-sm font-medium tracking-[0.08em] text-white transition-colors hover:bg-ink"
+                className="u-focus inline-flex h-12 items-center rounded-full bg-paper px-6 text-sm font-medium tracking-[0.08em] text-ink transition-colors hover:bg-white"
               >
                 {strings.exploreWorks}
               </Link>
               <Link
                 href="/en/about"
-                className="u-focus inline-flex h-12 items-center rounded-full border border-line bg-surface px-6 text-sm font-medium text-ink transition-colors hover:border-shell hover:text-shell"
+                className="u-focus inline-flex h-12 items-center rounded-full border border-paper/60 px-6 text-sm font-medium text-paper transition-colors hover:border-paper hover:bg-paper/10"
               >
                 {strings.aboutAuthor}
               </Link>
             </div>
-          </div>
-
-          <div className="relative mx-auto aspect-[4/5] w-full max-w-[20rem]">
-            {stack.map((work, index) => (
-              <Link
-                key={work.slug}
-                href={workHref('en', work)}
-                className="u-focus absolute inset-0 rounded-2xl border border-line bg-surface p-3 shadow-sm transition-transform duration-300 hover:z-10 hover:-translate-y-1"
-                style={{
-                  transform: `rotate(${(index - 1) * 4}deg) translate(${(index - 1) * 8}px, ${index * 8}px)`,
-                  zIndex: stack.length - index,
-                }}
-              >
-                <img
-                  src={work.cover}
-                  alt={work.title.en}
-                  className="h-full w-full rounded-xl bg-paper-deep object-contain p-2"
-                />
-              </Link>
-            ))}
           </div>
         </div>
       </section>

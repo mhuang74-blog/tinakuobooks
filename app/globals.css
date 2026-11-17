@@ -198,3 +198,16 @@
     animation: none;
   }
 }
+
+/* Landing splash scrim — darkens the hero photo so overlaid text stays legible. */
+.splash-scrim {
+  background:
+    linear-gradient(
+      to top,
+      rgb(18 15 12 / 0.82) 0%,
+      rgb(18 15 12 / 0.42) 36%,
+      rgb(18 15 12 / 0.12) 70%,
+      rgb(18 15 12 / 0.04) 100%
+    ),
+    linear-gradient(to right, rgb(18 15 12 / 0.34) 0%, rgb(18 15 12 / 0) 58%);
+}
