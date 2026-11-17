@@ -22,10 +22,10 @@ export function NotFoundContent({ locale = 'zh' }: Props) {
           {strings.browseWorks}
         </Link>
         <a className="btn btn-ghost" href={homeHref(switchLocale)} hrefLang={switchLocale}>
-          {switchLocale === 'en' ? '中文' : 'English'}
+          {switchLocale === 'en' ? 'English' : '中文'}
         </a>
         <Link className="btn btn-ghost" href={worksHref(switchLocale)} hrefLang={switchLocale}>
-          {switchLocale === 'en' ? '中文作品' : 'English works'}
+          {switchLocale === 'en' ? 'English works' : '中文作品'}
         </Link>
       </div>
     </div>
