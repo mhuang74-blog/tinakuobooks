@@ -1,185 +1,275 @@
 import type { Metadata } from 'next'
-import Link from 'next/link'
 import { JsonLd } from '@/components/json-ld'
-import { CollectionCard } from '@/components/collection-card'
-import { NewsletterSection } from '@/components/newsletter-section'
-import { SectionHeading } from '@/components/section-heading'
-import { WorksGrid } from '@/components/works-grid'
-import { aboutParagraphs } from '@/content/about'
-import { collections, getCollection } from '@/content/collections'
-import {
-  getAllWorks,
-  getFeaturedWork,
-  getWorksByCollection,
-} from '@/lib/works'
-import { SITE_DESCRIPTION_ZH, SITE_TITLE_ZH } from '@/lib/site'
+import { FeaturedWork } from '@/components/portfolio/featured-work'
+import { HomeDialogProvider } from '@/components/portfolio/home-dialog-provider'
+import { HomeShelf } from '@/components/portfolio/home-shelf'
+import { InquiryForm } from '@/components/portfolio/inquiry-form'
+import { coloringBook, homeCopy } from '@/content/portfolio'
+import { getFeaturedEntry, getShelfEntries } from '@/lib/portfolio'
 import { buildMetadata, websiteJsonLd } from '@/lib/seo'
-import { formatDate, ui } from '@/lib/i18n'
 
-const strings = ui.zh
+const copy = homeCopy.zh
+const locale = 'zh'
 
 export const metadata: Metadata = {
   ...buildMetadata({
-    locale: 'zh',
-    title: SITE_TITLE_ZH,
-    description: SITE_DESCRIPTION_ZH,
+    locale,
+    title: copy.meta.title,
+    description: copy.meta.description,
     path: '/',
     alternates: { zh: '/', en: '/en', xDefault: '/' },
-    image: { url: '/og/home.jpg', alt: SITE_TITLE_ZH },
+    image: { url: '/og/home.jpg', alt: copy.meta.title },
     keywords: ['郭瀞婷', 'Tina Kuo', '童書', '繪本', '兒童文學'],
   }),
-  title: { absolute: SITE_TITLE_ZH },
+  title: { absolute: copy.meta.title },
 }
 
 export default function HomePage() {
-  const works = getAllWorks()
-  const featured = getFeaturedWork()
-  const rest = works.filter((work) => work.slug !== featured.slug)
-  const stack = [featured, ...rest.slice(0, 2)]
-  const latest = rest.slice(0, 6)
-  const featuredCollection = getCollection(featured.collectionId)
+  const entries = getShelfEntries(locale)
+  const featured = getFeaturedEntry(locale)
+  const stats = [
+    String(entries.length),
+    String(new Set(entries.map((entry) => entry.category)).size),
+    String(Math.min(...entries.map((entry) => Number(entry.year)))),
+  ]
 
   return (
-    <>
-      <JsonLd data={websiteJsonLd('zh')} />
+    <HomeDialogProvider locale={locale}>
+      <JsonLd data={websiteJsonLd(locale)} />
 
-      <section className="u-container pt-12 sm:pt-16">
-        <div className="grid items-center gap-10 lg:grid-cols-[1.05fr_1fr]">
-          <div className="hero-rise">
-            <p className="u-eyebrow">郭瀞婷寫作</p>
-            <h1 className="u-display mt-4 text-4xl leading-tight sm:text-5xl lg:text-6xl">
-              讓故事延伸下去
+      <section className="hero">
+        <div className="wrap hero-grid">
+          <div className="hero-copy">
+            <p className="kicker">{copy.hero.kicker[locale]}</p>
+            <h1 className="hero-name">
+              {copy.hero.name[locale]}
+              <svg className="hero-seal" viewBox="0 0 34 34" aria-hidden="true" focusable="false">
+                <rect
+                  x="1"
+                  y="1"
+                  width="32"
+                  height="32"
+                  rx="3"
+                  fill="none"
+                  stroke="#BE4129"
+                  strokeWidth="2"
+                />
+                <text
+                  x="17"
+                  y="23"
+                  textAnchor="middle"
+                  fontSize="16"
+                  fill="#BE4129"
+                  fontFamily="'Songti SC','Source Han Serif SC',serif"
+                >
+                  婷
+                </text>
+              </svg>
             </h1>
-            <p className="mt-5 max-w-xl text-lg leading-relaxed text-ink-muted">
-              Celebrate stories created by my wife Tina Kuo.
-            </p>
-            <div className="mt-8 flex flex-wrap gap-3">
-              <Link
-                href="/works"
-                className="u-focus inline-flex h-12 items-center rounded-full bg-shell px-6 text-sm font-medium tracking-[0.08em] text-white transition-colors hover:bg-ink"
-              >
-                {strings.exploreWorks}
-              </Link>
-              <a
-                href="/about/"
-                className="u-focus inline-flex h-12 items-center rounded-full border border-line bg-surface px-6 text-sm font-medium text-ink transition-colors hover:border-shell hover:text-shell"
-              >
-                {strings.aboutAuthor}
+            <p className="hero-en">{copy.hero.subtitle[locale]}</p>
+            <p className="hero-lead">{copy.hero.lead[locale]}</p>
+            <div className="hero-actions">
+              <a className="btn btn-primary" href="#works">
+                {copy.hero.primaryCta[locale]}
               </a>
+              <a className="btn btn-ghost" href="#contact">
+                {copy.hero.secondaryCta[locale]}
+              </a>
+            </div>
+            <div className="stats">
+              {copy.hero.stats.map((stat, index) => (
+                <div className="stat" key={stat.caption[locale]}>
+                  <span className="stat-num">{stats[index]}</span>
+                  <span className="stat-cap">{stat.caption[locale]}</span>
+                </div>
+              ))}
             </div>
           </div>
 
-          <div className="relative mx-auto aspect-[4/5] w-full max-w-[20rem]">
-            {stack.map((work, index) => (
-              <a
-                key={work.slug}
-                href={`/${work.slug}`}
-                className="u-focus absolute inset-0 rounded-2xl border border-line bg-surface p-3 shadow-sm transition-transform duration-300 hover:z-10 hover:-translate-y-1"
-                style={{
-                  transform: `rotate(${(index - 1) * 4}deg) translate(${(index - 1) * 8}px, ${index * 8}px)`,
-                  zIndex: stack.length - index,
-                }}
-              >
-                <img
-                  src={work.cover}
-                  alt={work.title.zh}
-                  className="h-full w-full rounded-xl bg-paper-deep object-contain p-2"
-                />
-              </a>
+          <FeaturedWork entry={featured} locale={locale} />
+        </div>
+      </section>
+
+      <section className="section" id="works">
+        <div className="wrap">
+          <header className="section-head">
+            <p className="eyebrow">{copy.works.eyebrow[locale]}</p>
+            <h2 className="section-title">{copy.works.title[locale]}</h2>
+            <p className="section-lead">{copy.works.lead[locale]}</p>
+          </header>
+
+          <HomeShelf entries={entries} locale={locale} />
+        </div>
+      </section>
+
+      <section className="section section-tint" id="reading">
+        <div className="wrap">
+          <header className="section-head">
+            <p className="eyebrow">{copy.reading.eyebrow[locale]}</p>
+            <h2 className="section-title">{copy.reading.title[locale]}</h2>
+            <p className="section-lead">{copy.reading.lead[locale]}</p>
+          </header>
+
+          <div className="reading-grid">
+            {copy.reading.cards.map((card) => (
+              <article className="read-card" data-reveal key={card.title.zh}>
+                <p className="read-age">{card.age[locale]}</p>
+                <h3>{card.title[locale]}</h3>
+                <p>{card.body[locale]}</p>
+                <ul className="prompts">
+                  {card.prompts.map((prompt) => (
+                    <li key={prompt.zh}>{prompt[locale]}</li>
+                  ))}
+                </ul>
+                <p className="read-books">{card.books[locale]}</p>
+              </article>
             ))}
           </div>
         </div>
       </section>
 
-      <section className="u-container mt-20" aria-labelledby="featured-heading">
-        <p className="u-eyebrow">{strings.featured}</p>
-        <div className="mt-6 grid gap-8 rounded-3xl border border-line bg-surface p-6 sm:p-8 md:grid-cols-[minmax(0,16rem)_1fr] md:items-center">
-          <a
-            href={`/${featured.slug}`}
-            className="u-focus block overflow-hidden rounded-2xl bg-paper-deep"
-          >
-            <img
-              src={featured.cover}
-              alt={featured.title.zh}
-              className="h-full w-full object-contain p-4"
-            />
-          </a>
-          <div>
-            <p
-              className="u-eyebrow"
-              style={{ color: featuredCollection.accent }}
-            >
-              {featuredCollection.name.zh}
-            </p>
-            <h2 id="featured-heading" className="u-display mt-2 text-2xl sm:text-3xl">
-              {featured.title.zh}
-            </h2>
-            <p className="mt-3 max-w-2xl text-sm leading-relaxed text-ink-muted">
-              {featured.description.zh}
-            </p>
-            <p className="mt-4 text-xs text-ink-muted">
-              {formatDate(featured.date, 'zh')} · {strings.readingTime(featured.readingMinutes.zh)}
-            </p>
-            <a
-              href={`/${featured.slug}`}
-              className="u-focus mt-6 inline-flex h-11 items-center rounded-full bg-shell px-5 text-sm font-medium text-white transition-colors hover:bg-ink"
-            >
-              {strings.readWork}
-            </a>
+      <section className="section" id="about">
+        <div className="wrap about-grid">
+          <div className="about-copy">
+            <p className="eyebrow">{copy.about.eyebrow[locale]}</p>
+            <blockquote className="pull">{copy.about.quote[locale]}</blockquote>
+            <p className="quote-src">{copy.about.source[locale]}</p>
+
+            <div className="bio-row" data-reveal>
+              <figure className="author-photo">
+                <img
+                  src="/images/bio-photo-tina.webp"
+                  width={194}
+                  height={200}
+                  alt={copy.about.name[locale]}
+                />
+                <figcaption>{copy.about.caption[locale]}</figcaption>
+              </figure>
+              <div className="bio-text">
+                <h3 className="bio-name">{copy.about.name[locale]}</h3>
+                {copy.about.paragraphs.map((paragraph) => (
+                  <p className="about-para" key={paragraph.zh}>
+                    {paragraph[locale]}
+                  </p>
+                ))}
+              </div>
+            </div>
+          </div>
+
+          <div className="about-side">
+            <h3 className="side-title">{copy.about.timelineTitle[locale]}</h3>
+            <ul className="timeline">
+              {copy.about.timeline.map((row) => (
+                <li key={row.year}>
+                  <span className="year">{row.year}</span>
+                  <span>{row.text[locale]}</span>
+                </li>
+              ))}
+            </ul>
           </div>
         </div>
       </section>
 
-      <section className="u-container mt-20" aria-label={strings.navCollections}>
-        <SectionHeading
-          eyebrow={strings.collectionsKicker}
-          title={strings.allCollections}
-          link={{ href: '/collections', label: strings.viewAllCollections }}
-        />
-        <div className="mt-6 grid gap-5 sm:grid-cols-2 lg:grid-cols-3">
-          {collections.map((collection) => (
-            <CollectionCard
-              key={collection.id}
-              id={collection.id}
-              locale="zh"
-              count={getWorksByCollection(collection.id).length}
-              href={`/tag/${collection.id}/`}
-              linkMode="legacy"
-            />
-          ))}
+      <section className="section section-dark" id="story">
+        <div className="wrap">
+          <header className="section-head">
+            <p className="eyebrow">{copy.story.eyebrow[locale]}</p>
+            <h2 className="section-title">{copy.story.title[locale]}</h2>
+            <p className="section-lead">{copy.story.lead[locale]}</p>
+          </header>
+
+          <div className="extension-grid">
+            <article className="ext-card" data-reveal>
+              <figure className="ext-poster">
+                <img
+                  className="ext-poster-img"
+                  src="/images/portfolio/work-sofa-poster.webp"
+                  width={763}
+                  height={1080}
+                  alt={copy.story.stage.title[locale]}
+                  loading="lazy"
+                  decoding="async"
+                />
+                <figcaption className="ext-poster-credit">
+                  {copy.story.stage.credit[locale]}
+                </figcaption>
+              </figure>
+              <div className="ext-body">
+                <p className="ext-kind">{copy.story.stage.kind[locale]}</p>
+                <h3>{copy.story.stage.title[locale]}</h3>
+                <p>{copy.story.stage.body[locale]}</p>
+              </div>
+            </article>
+
+            <article className="ext-card" data-reveal>
+              <img
+                className="ext-img"
+                src={coloringBook.art.src}
+                width={coloringBook.art.width}
+                height={coloringBook.art.height}
+                alt={copy.story.coloring.title[locale]}
+                loading="lazy"
+                decoding="async"
+              />
+              <div className="ext-body">
+                <p className="ext-kind">{copy.story.coloring.kind[locale]}</p>
+                <h3>{copy.story.coloring.title[locale]}</h3>
+                <p>{copy.story.coloring.body[locale]}</p>
+                <a className="btn btn-on-dark ext-btn" href={coloringBook.pdf}>
+                  {copy.story.coloring.cta[locale]}
+                </a>
+              </div>
+            </article>
+          </div>
         </div>
       </section>
 
-      <section className="u-container mt-20" aria-label={strings.latestWorks}>
-        <SectionHeading
-          eyebrow={strings.worksKicker}
-          title={strings.latestWorks}
-          link={{ href: '/works', label: strings.viewAllWorks }}
-        />
-        <div className="mt-6">
-          <WorksGrid works={latest} locale="zh" linkMode="legacy" />
+      <section className="section section-tint" id="contact">
+        <div className="wrap">
+          <header className="section-head">
+            <p className="eyebrow">{copy.contact.eyebrow[locale]}</p>
+            <h2 className="section-title" tabIndex={-1}>
+              {copy.contact.title[locale]}
+            </h2>
+            <p className="section-lead">{copy.contact.lead[locale]}</p>
+          </header>
+
+          <div className="rights-grid">
+            <div className="rights-left">
+              <h3 className="sub-title">{copy.contact.reachTitle[locale]}</h3>
+              <ul className="contact-list">
+                {copy.contact.rows.map((row) => (
+                  <li key={row.label.zh}>
+                    <span className="contact-label">{row.label[locale]}</span>
+                    {row.href ? (
+                      <a href={row.href} rel="noopener">
+                        {row.value[locale]}
+                      </a>
+                    ) : (
+                      <span>{row.value[locale]}</span>
+                    )}
+                  </li>
+                ))}
+              </ul>
+
+              <h3 className="sub-title sub-title-spaced">{copy.contact.licenceTitle[locale]}</h3>
+              <p className="license-note">{copy.contact.licence[locale]}</p>
+
+              <h3 className="sub-title sub-title-spaced">{copy.contact.usageTitle[locale]}</h3>
+              <ul className="info-list">
+                {copy.contact.usage.map((item) => (
+                  <li key={item.label.zh}>
+                    <span className="info-year">{item.label[locale]}</span>
+                    {item.text[locale]}
+                  </li>
+                ))}
+              </ul>
+            </div>
+
+            <InquiryForm locale={locale} />
+          </div>
         </div>
       </section>
-
-      <section className="u-container mt-20" aria-label={strings.aboutKicker}>
-        <div className="rounded-3xl border border-line bg-surface p-6 sm:p-10">
-          <p className="u-eyebrow">{strings.aboutKicker}</p>
-          <h2 className="u-display mt-2 max-w-3xl text-2xl leading-relaxed sm:text-3xl">
-            {aboutParagraphs.zh[0]}
-          </h2>
-          <a
-            href="/about/"
-            className="u-focus mt-6 inline-flex items-center gap-2 text-sm font-medium text-shell hover:underline"
-          >
-            {strings.moreAbout}
-            <span aria-hidden="true">→</span>
-          </a>
-        </div>
-      </section>
-
-      <section className="u-container mt-20">
-        <NewsletterSection locale="zh" idPrefix="home-newsletter" />
-      </section>
-    </>
+    </HomeDialogProvider>
   )
 }

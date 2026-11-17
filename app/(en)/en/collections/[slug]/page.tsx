@@ -1,13 +1,13 @@
 import type { Metadata } from 'next'
-import { notFound } from 'next/navigation'
 import Link from 'next/link'
+import { notFound } from 'next/navigation'
 import { Breadcrumbs } from '@/components/breadcrumbs'
 import { JsonLd } from '@/components/json-ld'
 import { WorksGrid } from '@/components/works-grid'
 import { collections, getCollection, isCollectionId } from '@/content/collections'
-import { getTranslatedWorks } from '@/lib/works'
-import { breadcrumbJsonLd, buildMetadata, collectionJsonLd } from '@/lib/seo'
 import { collectionHref, ui } from '@/lib/i18n'
+import { breadcrumbJsonLd, buildMetadata, collectionJsonLd } from '@/lib/seo'
+import { getTranslatedWorks } from '@/lib/works'
 
 export const dynamicParams = false
 
@@ -55,7 +55,7 @@ export default async function EnCollectionPage({
   const works = getTranslatedWorks().filter((work) => work.collectionId === slug)
 
   return (
-    <div className="u-container pt-8">
+    <>
       <JsonLd data={collectionJsonLd(collection, works, 'en')} />
       <JsonLd
         data={breadcrumbJsonLd([
@@ -65,42 +65,40 @@ export default async function EnCollectionPage({
         ])}
       />
 
-      <Breadcrumbs
-        items={[
-          { label: strings.home, href: '/en' },
-          { label: strings.navCollections, href: '/en/collections' },
-          { label: collection.name.en },
-        ]}
-      />
-
-      <header className="mt-8 max-w-2xl">
-        <span
-          aria-hidden="true"
-          className="block h-1 w-16 rounded-full"
-          style={{ backgroundColor: collection.accent }}
+      <div className="wrap detail-crumbs">
+        <Breadcrumbs
+          items={[
+            { label: strings.home, href: '/en' },
+            { label: strings.navCollections, href: '/en/collections' },
+            { label: collection.name.en },
+          ]}
         />
-        <h1 className="u-display mt-4 text-4xl">{collection.name.en}</h1>
-        <p className="mt-3 text-lg text-ink-muted">{collection.description.en}</p>
-        <p className="mt-2 text-sm text-ink-muted">{strings.workCount(works.length)}</p>
+      </div>
+
+      <header className="wrap page-head">
+        <p className="eyebrow" style={{ color: collection.accent }}>
+          {strings.collectionsKicker}
+        </p>
+        <h1 className="page-title">{collection.name.en}</h1>
+        <p className="page-lead">{collection.description.en}</p>
+        <p className="page-meta">{strings.workCount(works.length)}</p>
       </header>
 
-      <div className="mt-10">
+      <div className="wrap page-body">
         <WorksGrid
           works={works}
           locale="en"
           linkMode="next"
-          emptyMessage="No works in this collection yet."
+          emptyTitle={strings.emptyTitle}
+          emptyBody={strings.emptyBody}
         />
       </div>
 
-      <p className="mt-12">
-        <Link
-          href="/en/works"
-          className="u-focus text-sm font-medium text-shell hover:underline"
-        >
+      <div className="wrap page-back">
+        <Link className="link-btn" href="/en/works">
           ← {strings.allWorks}
         </Link>
-      </p>
-    </div>
+      </div>
+    </>
   )
 }

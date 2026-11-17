@@ -1,14 +1,14 @@
 import type { Metadata } from 'next'
-import { notFound } from 'next/navigation'
 import Link from 'next/link'
+import { notFound } from 'next/navigation'
 import { Breadcrumbs } from '@/components/breadcrumbs'
 import { JsonLd } from '@/components/json-ld'
 import { WorksGrid } from '@/components/works-grid'
 import { authors, getAuthor, isAuthorId } from '@/content/authors'
-import { getTranslatedWorks } from '@/lib/works'
-import { authorJsonLd, breadcrumbJsonLd, buildMetadata } from '@/lib/seo'
 import { authorHref, ui } from '@/lib/i18n'
+import { authorJsonLd, breadcrumbJsonLd, buildMetadata } from '@/lib/seo'
 import { FACEBOOK_URL } from '@/lib/site'
+import { getTranslatedWorks } from '@/lib/works'
 
 export const dynamicParams = false
 
@@ -44,11 +44,7 @@ export async function generateMetadata({
   })
 }
 
-export default async function EnAuthorPage({
-  params,
-}: {
-  params: Promise<Params>
-}) {
+export default async function EnAuthorPage({ params }: { params: Promise<Params> }) {
   const { id } = await params
   if (!isAuthorId(id)) notFound()
 
@@ -56,7 +52,7 @@ export default async function EnAuthorPage({
   const works = getTranslatedWorks().filter((work) => work.authorId === id)
 
   return (
-    <div className="u-container pt-8">
+    <>
       <JsonLd data={authorJsonLd(author, works, 'en')} />
       <JsonLd
         data={breadcrumbJsonLd([
@@ -66,65 +62,59 @@ export default async function EnAuthorPage({
         ])}
       />
 
-      <Breadcrumbs
-        items={[
-          { label: strings.home, href: '/en' },
-          { label: strings.navWorks, href: '/en/works' },
-          { label: author.name.en },
-        ]}
-      />
-
-      <header className="mt-8 grid gap-8 md:grid-cols-[12rem_1fr] md:items-start">
-        <img
-          src={author.picture}
-          alt={author.name.en}
-          className="w-full rounded-2xl border border-line bg-paper-deep object-cover"
+      <div className="wrap detail-crumbs">
+        <Breadcrumbs
+          items={[
+            { label: strings.home, href: '/en' },
+            { label: strings.navWorks, href: '/en/works' },
+            { label: author.name.en },
+          ]}
         />
+      </div>
+
+      <header className="wrap author-hero page-head">
+        <figure className="author-portrait">
+          <img src={author.picture} alt={author.name.en} decoding="async" />
+        </figure>
         <div>
-          <h1 className="u-display text-4xl">{author.name.en}</h1>
-          <p className="mt-2 text-sm text-ink-muted">{author.location.en}</p>
-          <p className="mt-4 max-w-2xl text-base leading-relaxed text-ink-muted">
-            {author.bio.en}
-          </p>
-          <p className="mt-4 flex flex-wrap gap-4 text-sm">
+          <p className="eyebrow">{strings.aboutAuthor}</p>
+          <h1 className="page-title">{author.name.en}</h1>
+          <p className="page-meta">{author.location.en}</p>
+          <p className="page-lead">{author.bio.en}</p>
+          <p className="author-links">
             {author.facebook ? (
               <a
+                className="link-btn"
                 href={FACEBOOK_URL}
                 target="_blank"
                 rel="noopener noreferrer"
-                className="u-focus text-shell hover:underline"
               >
                 Facebook
               </a>
             ) : null}
-            <a
-              href={`${authorHref('en', id)}/feed.xml`}
-              className="u-focus text-shell hover:underline"
-            >
+            <a className="link-btn" href={`${authorHref('en', id)}/feed.xml`}>
               RSS
             </a>
+            <span className="work-count">{strings.workCount(works.length)}</span>
           </p>
-          <p className="mt-2 text-xs text-ink-muted">{strings.workCount(works.length)}</p>
         </div>
       </header>
 
-      <div className="mt-10">
+      <div className="wrap page-body">
         <WorksGrid
           works={works}
           locale="en"
           linkMode="next"
-          emptyMessage="No works yet."
+          emptyTitle={strings.emptyTitle}
+          emptyBody={strings.emptyBody}
         />
       </div>
 
-      <p className="mt-12">
-        <Link
-          href="/en/collections"
-          className="u-focus text-sm font-medium text-shell hover:underline"
-        >
+      <div className="wrap page-back">
+        <Link className="link-btn" href="/en/collections">
           {strings.allCollections}
         </Link>
-      </p>
-    </div>
+      </div>
+    </>
   )
 }

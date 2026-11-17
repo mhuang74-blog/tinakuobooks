@@ -1,6 +1,6 @@
 export const SITE_URL = 'https://www.tinakuobooks.com'
-export const SITE_TITLE_ZH = '郭瀞婷寫作 Tina Kuo Books'
-export const SITE_TITLE_EN = 'Tina Kuo Books'
+export const SITE_TITLE_ZH = '郭瀞婷 Tina Kuo'
+export const SITE_TITLE_EN = 'Tina Kuo'
 export const SITE_DESCRIPTION_ZH =
   '讓故事延伸下去 Celebrate stories created by my wife Tina Kuo.'
 export const SITE_DESCRIPTION_EN = 'Celebrate stories created by Tina Kuo.'

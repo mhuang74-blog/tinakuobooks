@@ -2,7 +2,8 @@
   "name": "tinakuobooks",
   "version": "1.0.0",
   "private": true,
-  "description": "Bilingual portfolio for the works of Tina Kuo, statically exported with Next.js",
+  "packageManager": "pnpm@10.24.0",
+  "description": "Bilingual portfolio for the works of Tina Kuo, built with Next.js",
   "license": "CC-BY-4.0",
   "engines": {
     "node": ">=20.9.0"
@@ -19,7 +20,6 @@
   },
   "dependencies": {
     "gray-matter": "4.0.3",
-    "motion": "14.14.0",
     "next": "16.4.6",
     "react": "19.3.1",
     "react-dom": "19.3.1",

@@ -10,7 +10,6 @@ import { getCollection } from '@/content/collections'
 import {
   authorHref,
   collectionHref,
-  formatDate,
   homeHref,
   ui,
   workHref,
@@ -18,6 +17,7 @@ import {
   type Locale,
 } from '@/lib/i18n'
 import { Markdown } from '@/lib/markdown'
+import { toShelfEntry } from '@/lib/portfolio'
 import { absoluteUrl } from '@/lib/site'
 import type { Work } from '@/lib/works'
 import { toWorkCardData } from '@/lib/work-card'
@@ -35,6 +35,7 @@ export function WorkDetail({ work, locale, newer, older, related }: Props) {
   const strings = ui[locale]
   const collection = getCollection(work.collectionId)
   const author = getAuthor(work.authorId)
+  const shelf = toShelfEntry(work.slug, locale)
   const linkMode = locale === 'zh' ? 'legacy' : 'next'
   const title = work.title[locale]
   const bodyLang =
@@ -44,7 +45,7 @@ export function WorkDetail({ work, locale, newer, older, related }: Props) {
     linkMode === 'legacy' ? (
       <a
         href={collectionHref(locale, collection.id)}
-        className="u-eyebrow hover:underline"
+        className="eyebrow"
         style={{ color: collection.accent }}
       >
         {collection.name[locale]}
@@ -52,7 +53,7 @@ export function WorkDetail({ work, locale, newer, older, related }: Props) {
     ) : (
       <Link
         href={collectionHref(locale, collection.id)}
-        className="u-eyebrow hover:underline"
+        className="eyebrow"
         style={{ color: collection.accent }}
       >
         {collection.name[locale]}
@@ -61,13 +62,9 @@ export function WorkDetail({ work, locale, newer, older, related }: Props) {
 
   const authorCard =
     linkMode === 'legacy' ? (
-      <a href={authorHref(locale, author.id)} className="u-focus hover:text-shell">
-        {author.name[locale]}
-      </a>
+      <a href={authorHref(locale, author.id)}>{author.name[locale]}</a>
     ) : (
-      <Link href={authorHref(locale, author.id)} className="u-focus hover:text-shell">
-        {author.name[locale]}
-      </Link>
+      <Link href={authorHref(locale, author.id)}>{author.name[locale]}</Link>
     )
 
   const notice =
@@ -77,12 +74,20 @@ export function WorkDetail({ work, locale, newer, older, related }: Props) {
         ? 'English translation pending. The original Chinese text is shown below.'
         : null
 
+  const alt = toWorkCardData(work, locale).bookTitle
+  const facts: [string, string][] = [
+    [strings.collection, collection.name[locale]],
+    [strings.detailReader, shelf?.reader ?? work.description[locale]],
+    [strings.published, work.date.slice(0, 4)],
+    [strings.englishEdition, work.slugEn ? strings.englishEdition : strings.inPreparation],
+  ]
+
   return (
-    <article className="pb-16">
+    <article>
       <ReadingProgress />
       <JsonLd data={workJsonLd(work, locale)} />
 
-      <div className="u-container pt-8">
+      <div className="wrap detail-crumbs">
         <Breadcrumbs
           items={[
             { label: strings.home, href: homeHref(locale), legacy: linkMode === 'legacy' },
@@ -92,73 +97,75 @@ export function WorkDetail({ work, locale, newer, older, related }: Props) {
         />
       </div>
 
-      <header className="u-container mt-6 grid gap-8 md:grid-cols-[minmax(0,20rem)_1fr] md:items-start">
-        <div className="rounded-2xl border border-line bg-surface p-4">
-          <div className="aspect-[3/4] overflow-hidden rounded-xl bg-paper-deep">
+      <div className="wrap detail-head">
+        <figure className="detail-cover">
+          <span className="cover-frame">
             <img
-              src={work.cover}
-              alt=""
-              className="h-full w-full object-contain p-3"
+              className="cover-img"
+              src={shelf?.art.src ?? work.cover}
+              width={shelf?.art.width}
+              height={shelf?.art.height}
+              alt={alt}
               decoding="async"
             />
-          </div>
-        </div>
+          </span>
+        </figure>
 
         <div>
           {collectionCard}
-          <h1 className="u-display mt-3 text-3xl leading-tight sm:text-4xl">{title}</h1>
-          <p className="mt-4 max-w-2xl text-base leading-relaxed text-ink-muted">
-            {work.description[locale]}
-          </p>
+          <h1 className="detail-title">{title}</h1>
+          {work.title.en && work.title.en !== title ? (
+            <p className="detail-en">{work.title.en}</p>
+          ) : null}
+          <p className="detail-blurb">{work.description[locale]}</p>
 
-          <dl className="mt-6 flex flex-wrap gap-x-8 gap-y-3 text-sm">
+          <dl className="fact-list">
+            {facts.map(([label, value]) => (
+              <div key={label}>
+                <dt>{label}</dt>
+                <dd>{value}</dd>
+              </div>
+            ))}
             <div>
-              <dt className="u-eyebrow">{strings.author}</dt>
-              <dd className="mt-1">{authorCard}</dd>
-            </div>
-            <div>
-              <dt className="u-eyebrow">{strings.published}</dt>
-              <dd className="mt-1">
-                <time dateTime={work.date}>{formatDate(work.date, locale)}</time>
-              </dd>
-            </div>
-            <div>
-              <dt className="u-eyebrow">{strings.readingTimeLabel}</dt>
-              <dd className="mt-1">{strings.readingTime(work.readingMinutes[locale])}</dd>
+              <dt>{strings.author}</dt>
+              <dd>{authorCard}</dd>
             </div>
           </dl>
 
-          <div className="mt-8">
+          <div className="detail-share">
             <ShareButtons
               url={absoluteUrl(workPath(work, locale))}
               title={title}
               locale={locale}
             />
           </div>
+
+          <p className="detail-actions">
+            <a className="btn btn-primary" href="#contents">
+              {strings.readContents}
+            </a>
+          </p>
         </div>
-      </header>
+      </div>
 
       {notice ? (
-        <div className="u-container mt-10">
-          <p className="rounded-xl border border-shell/30 bg-shell-soft/40 px-4 py-3 text-sm text-ink">
-            {notice}
-          </p>
+        <div className="wrap">
+          <p className="notice">{notice}</p>
         </div>
       ) : null}
 
-      <section className="u-container mt-12" aria-label={title}>
+      <section className="wrap detail-body-section" id="contents" aria-label={title}>
+        <p className="eyebrow">{strings.contents}</p>
         <Markdown className="work-body" lang={bodyLang}>
           {work.body[locale]}
         </Markdown>
       </section>
 
-      <div className="u-container mt-16 space-y-16">
+      <div className="wrap detail-foot">
         {related.length > 0 ? (
           <section aria-labelledby="related-heading">
-            <h2 id="related-heading" className="u-display text-2xl">
-              {strings.relatedWorks}
-            </h2>
-            <div className="mt-6 grid gap-6 md:grid-cols-2 xl:grid-cols-3">
+            <h2 id="related-heading">{strings.relatedWorks}</h2>
+            <div className="shelf detail-related">
               {related.map((item) => (
                 <WorkCard
                   key={item.slug}
@@ -171,26 +178,17 @@ export function WorkDetail({ work, locale, newer, older, related }: Props) {
           </section>
         ) : null}
 
-        <nav
-          aria-label={strings.navWorks}
-          className="grid gap-4 border-t border-line pt-8 sm:grid-cols-2"
-        >
+        <nav aria-label={strings.navWorks} className="pager">
           {newer ? (
             linkMode === 'next' ? (
-              <Link
-                href={workHref(locale, newer)}
-                className="u-focus rounded-2xl border border-line bg-surface p-5 transition-colors hover:border-shell"
-              >
-                <span className="u-eyebrow">← {strings.newerWork}</span>
-                <span className="u-display mt-2 block text-lg">{newer.title[locale]}</span>
+              <Link href={workHref(locale, newer)}>
+                <span className="eyebrow">← {strings.newerWork}</span>
+                <span className="pager-title">{newer.title[locale]}</span>
               </Link>
             ) : (
-              <a
-                href={workHref(locale, newer)}
-                className="u-focus rounded-2xl border border-line bg-surface p-5 transition-colors hover:border-shell"
-              >
-                <span className="u-eyebrow">← {strings.newerWork}</span>
-                <span className="u-display mt-2 block text-lg">{newer.title[locale]}</span>
+              <a href={workHref(locale, newer)}>
+                <span className="eyebrow">← {strings.newerWork}</span>
+                <span className="pager-title">{newer.title[locale]}</span>
               </a>
             )
           ) : (
@@ -198,20 +196,14 @@ export function WorkDetail({ work, locale, newer, older, related }: Props) {
           )}
           {older ? (
             linkMode === 'next' ? (
-              <Link
-                href={workHref(locale, older)}
-                className="u-focus rounded-2xl border border-line bg-surface p-5 text-right transition-colors hover:border-shell"
-              >
-                <span className="u-eyebrow">{strings.olderWork} →</span>
-                <span className="u-display mt-2 block text-lg">{older.title[locale]}</span>
+              <Link href={workHref(locale, older)} className="pager-next">
+                <span className="eyebrow">{strings.olderWork} →</span>
+                <span className="pager-title">{older.title[locale]}</span>
               </Link>
             ) : (
-              <a
-                href={workHref(locale, older)}
-                className="u-focus rounded-2xl border border-line bg-surface p-5 text-right transition-colors hover:border-shell"
-              >
-                <span className="u-eyebrow">{strings.olderWork} →</span>
-                <span className="u-display mt-2 block text-lg">{older.title[locale]}</span>
+              <a href={workHref(locale, older)} className="pager-next">
+                <span className="eyebrow">{strings.olderWork} →</span>
+                <span className="pager-title">{older.title[locale]}</span>
               </a>
             )
           ) : null}

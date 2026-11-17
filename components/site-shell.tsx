@@ -1,4 +1,5 @@
 import type { ReactNode } from 'react'
+import { RevealObserver } from '@/components/portfolio/reveal-observer'
 import { SiteFooter } from '@/components/site-footer'
 import { SiteHeader } from '@/components/site-header'
 import { SubscribeProvider } from '@/components/subscribe-provider'
@@ -18,15 +19,13 @@ export function SiteShell({ locale, children }: Props) {
 
   return (
     <SubscribeProvider locale={locale}>
-      <a
-        href="#main"
-        className="u-focus sr-only focus:not-sr-only focus:fixed focus:left-4 focus:top-4 focus:z-50 focus:rounded-full focus:bg-ink focus:px-4 focus:py-2 focus:text-sm focus:text-paper"
-      >
+      <a href="#main" className="skip-link">
         {ui[locale].skipToContent}
       </a>
       <SiteHeader locale={locale} pairs={pairs} />
       <main id="main">{children}</main>
       <SiteFooter locale={locale} />
+      <RevealObserver />
     </SubscribeProvider>
   )
 }

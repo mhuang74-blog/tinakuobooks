@@ -36,12 +36,11 @@ export function ShareButtons({ url, title, locale }: Props) {
     timer.current = setTimeout(() => setStatus('idle'), 2000)
   }
 
-  const buttonClass =
-    'u-focus inline-flex h-10 items-center gap-2 rounded-full border border-line bg-surface px-4 text-xs font-medium text-ink-muted transition-colors hover:border-shell hover:text-shell'
+  const buttonClass = 'share-btn'
 
   return (
-    <div className="flex flex-wrap items-center gap-2">
-      <span className="u-eyebrow mr-1">{strings.share}</span>
+    <div className="share-row">
+      <span className="eyebrow">{strings.share}</span>
 
       <a
         href={facebook}
@@ -50,7 +49,7 @@ export function ShareButtons({ url, title, locale }: Props) {
         aria-label={strings.shareFacebook}
         className={buttonClass}
       >
-        <FacebookIcon className="h-4 w-4" />
+        <FacebookIcon className="od-icon" />
         Facebook
       </a>
 
@@ -61,7 +60,7 @@ export function ShareButtons({ url, title, locale }: Props) {
         aria-label={strings.shareX}
         className={buttonClass}
       >
-        <XIcon className="h-3.5 w-3.5" />X
+        <XIcon className="od-icon" />X
       </a>
 
       <button
@@ -70,11 +69,11 @@ export function ShareButtons({ url, title, locale }: Props) {
         aria-label={strings.copyLink}
         className={buttonClass}
       >
-        <LinkIcon className="h-4 w-4" />
+        <LinkIcon className="od-icon" />
         {strings.copyLink}
       </button>
 
-      <span role="status" aria-live="polite" className="text-xs text-ink-muted">
+      <span role="status" aria-live="polite" className="page-meta">
         {status === 'copied' ? strings.copied : status === 'failed' ? strings.copyFailed : ''}
       </span>
     </div>

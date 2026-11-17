@@ -17,33 +17,29 @@ export function NewsletterForm({ locale, idPrefix = 'subscribe' }: Props) {
       method="post"
       target="_blank"
       rel="noopener noreferrer"
-      className="flex flex-col gap-4"
+      className="newsletter-form"
     >
-      <div className="flex flex-col gap-2">
-        <label htmlFor={emailId} className="text-sm font-medium">
-          {strings.subscribeEmail}
-        </label>
+      <div className="field">
+        <label htmlFor={emailId}>{strings.subscribeEmail}</label>
         <input
           id={emailId}
           type="email"
           name="EMAIL"
           required
           autoComplete="email"
-          className="h-11 w-full min-w-0 rounded-lg border border-line bg-paper px-3 text-sm text-ink placeholder:text-ink-muted/60"
+          className="input"
         />
       </div>
 
-      <div className="flex flex-col gap-2">
-        <label htmlFor={nameId} className="text-sm font-medium">
-          {strings.subscribeName}
-        </label>
+      <div className="field">
+        <label htmlFor={nameId}>{strings.subscribeName}</label>
         <input
           id={nameId}
           type="text"
           name="CH_NAME"
           required
           autoComplete="nickname"
-          className="h-11 w-full min-w-0 rounded-lg border border-line bg-paper px-3 text-sm text-ink placeholder:text-ink-muted/60"
+          className="input"
         />
       </div>
 
@@ -60,11 +56,7 @@ export function NewsletterForm({ locale, idPrefix = 'subscribe' }: Props) {
         />
       </div>
 
-      <button
-        type="submit"
-        name="subscribe"
-        className="u-focus inline-flex h-11 items-center justify-center rounded-full bg-shell px-6 text-sm font-medium tracking-[0.08em] text-white transition-colors hover:bg-ink"
-      >
+      <button type="submit" name="subscribe" className="btn btn-primary">
         {strings.subscribeSubmit}
       </button>
     </form>

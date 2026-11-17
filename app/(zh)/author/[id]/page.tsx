@@ -4,10 +4,10 @@ import { Breadcrumbs } from '@/components/breadcrumbs'
 import { JsonLd } from '@/components/json-ld'
 import { WorksGrid } from '@/components/works-grid'
 import { authors, getAuthor, isAuthorId } from '@/content/authors'
-import { getWorksByAuthor } from '@/lib/works'
+import { authorHref, homeHref, ui, worksHref } from '@/lib/i18n'
 import { authorJsonLd, breadcrumbJsonLd, buildMetadata } from '@/lib/seo'
-import { authorHref, homeHref, ui } from '@/lib/i18n'
 import { FACEBOOK_URL } from '@/lib/site'
+import { getWorksByAuthor } from '@/lib/works'
 
 export const dynamicParams = false
 
@@ -51,7 +51,7 @@ export default async function AuthorPage({ params }: { params: Promise<Params> }
   const works = getWorksByAuthor(id)
 
   return (
-    <div className="u-container pt-8">
+    <>
       <JsonLd data={authorJsonLd(author, works, 'zh')} />
       <JsonLd
         data={breadcrumbJsonLd([
@@ -61,51 +61,59 @@ export default async function AuthorPage({ params }: { params: Promise<Params> }
         ])}
       />
 
-      <Breadcrumbs
-        items={[
-          { label: strings.home, href: homeHref('zh'), legacy: true },
-          { label: strings.navWorks, href: '/works', legacy: false },
-          { label: author.name.zh },
-        ]}
-      />
-
-      <header className="mt-8 grid gap-8 md:grid-cols-[12rem_1fr] md:items-start">
-        <img
-          src={author.picture}
-          alt={author.name.zh}
-          className="w-full rounded-2xl border border-line bg-paper-deep object-cover"
+      <div className="wrap detail-crumbs">
+        <Breadcrumbs
+          items={[
+            { label: strings.home, href: homeHref('zh'), legacy: true },
+            { label: strings.navWorks, href: '/works', legacy: false },
+            { label: author.name.zh },
+          ]}
         />
+      </div>
+
+      <header className="wrap author-hero page-head">
+        <figure className="author-portrait">
+          <img src={author.picture} alt={author.name.zh} decoding="async" />
+        </figure>
         <div>
-          <h1 className="u-display text-4xl">{author.name.zh}</h1>
-          <p className="mt-2 text-sm text-ink-muted">{author.location.zh}</p>
-          <p className="mt-4 max-w-2xl text-base leading-relaxed text-ink-muted">
-            {author.bio.zh}
-          </p>
-          <p className="mt-4 flex flex-wrap gap-4 text-sm">
+          <p className="eyebrow">{strings.aboutAuthor}</p>
+          <h1 className="page-title">{author.name.zh}</h1>
+          <p className="page-meta">{author.location.zh}</p>
+          <p className="page-lead">{author.bio.zh}</p>
+          <p className="author-links">
             {author.facebook ? (
               <a
+                className="link-btn"
                 href={FACEBOOK_URL}
                 target="_blank"
                 rel="noopener noreferrer"
-                className="u-focus text-shell hover:underline"
               >
                 Facebook
               </a>
             ) : null}
-            <a
-              href={`${authorHref('zh', id)}feed.xml`}
-              className="u-focus text-shell hover:underline"
-            >
+            <a className="link-btn" href={`${authorHref('zh', id)}feed.xml`}>
               RSS
             </a>
+            <span className="work-count">{strings.workCount(works.length)}</span>
           </p>
-          <p className="mt-2 text-xs text-ink-muted">{strings.workCount(works.length)}</p>
         </div>
       </header>
 
-      <div className="mt-10">
-        <WorksGrid works={works} locale="zh" linkMode="legacy" emptyMessage="目前還沒有作品。" />
+      <div className="wrap page-body">
+        <WorksGrid
+          works={works}
+          locale="zh"
+          linkMode="legacy"
+          emptyTitle={strings.emptyTitle}
+          emptyBody={strings.emptyBody}
+        />
       </div>
-    </div>
+
+      <div className="wrap page-back">
+        <a className="link-btn" href={worksHref('zh')}>
+          ← {strings.allWorks}
+        </a>
+      </div>
+    </>
   )
 }

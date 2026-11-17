@@ -7,25 +7,25 @@ Vercel — no CMS, no separate image optimizer service.
 ## Requirements
 
 - Node.js 22 (`>=20.9.0` is the hard floor for Next 16 and `sharp`)
-- npm 10+
+- pnpm 10 (`corepack enable pnpm`, pinned via `packageManager`)
 
 ## Commands
 
 ```bash
-npm install          # install dependencies
-npm run dev          # local dev server on http://localhost:3000
-npm run build        # content validation, then next build
-npm run start        # serve the production build on port 3000
-npm run lint         # eslint
-npm run typecheck    # tsc --noEmit
-npm run test:e2e     # Playwright suite (builds and serves automatically)
-npm run images       # regenerate WebP covers, OG images, and the legacy PDF copy
+pnpm install         # install dependencies
+pnpm run dev         # local dev server on http://localhost:3000
+pnpm run build       # content validation, then next build
+pnpm run start       # serve the production build on port 3000
+pnpm run lint        # eslint
+pnpm run typecheck   # tsc --noEmit
+pnpm run test:e2e    # Playwright suite (builds and serves automatically)
+pnpm run images      # regenerate WebP covers, OG images, and the legacy PDF copy
 ```
 
-`npm run build` runs `prebuild` → `scripts/validate-content.ts` first, which
+`pnpm run build` runs `prebuild` → `scripts/validate-content.ts` first, which
 fails the build on broken front matter, duplicate English slugs, missing covers,
 or stale `<!--more-->` markers. `vercel.json` pins `buildCommand` to
-`npm run build` so the same validation runs on Vercel.
+`pnpm run build` so the same validation runs on Vercel.
 
 ## Content
 
@@ -38,6 +38,8 @@ content/
   collections.ts              the five collections (names, descriptions, covers, accents)
   authors.ts                  author profiles
   about.ts                    about copy for the home teaser and the about pages
+  portfolio.ts                home presentation data: shelf order, tags, cover art,
+                              reader notes, excerpts, and all home-page copy
 ```
 
 - Pairing is by filename. `content/works/en/57號小豹.md` is the English version
@@ -46,8 +48,9 @@ content/
   `Asia/Taipei` so server and client render the same date.
 - The Chinese filename is the legacy public URL (`/<slug>`); never rename it
   without adding a redirect at the hosting layer.
-- `featured: true` on exactly one work drives the homepage hero. Move the flag
-  to change the hero.
+- `featuredSlug` in `content/portfolio.ts` chooses the homepage hero and dialog
+  entry. `portfolioWorks` order is the shelf order (newest first) and must cover
+  every work; `scripts/validate-content.ts` fails when a slug is missing.
 
 ### Missing or partial translations
 
@@ -78,7 +81,7 @@ routes (`/works`, `/collections`, `/en/**`) use `next/link`.
 ## Images
 
 `assets/source-images/` holds the originals and is not deployed.
-`npm run images` writes:
+`pnpm run images` writes:
 
 - `public/images/<name>.webp` — max width 1600 (800 for author photos)
 - `public/og/<name>.jpg` — 1200×630 Open Graph cards for covers and the homepage
@@ -88,6 +91,9 @@ The generated files are committed. Re-run the script when adding new artwork.
 
 ## Deployment
 
+`.github/workflows/deploy.yml` runs on every push to `master`: pnpm install,
+lint, typecheck, build, and Playwright. It publishes nothing.
+
 The app is a native Next.js app (no `output: 'export'`), hosted on Vercel:
 
 | Target | Trigger |
@@ -95,14 +101,14 @@ The app is a native Next.js app (no `output: 'export'`), hosted on Vercel:
 | Preview | `vercel deploy` from the working tree |
 | Production | Vercel Git integration on `master` (not enabled yet) |
 
-`vercel.json` sets `framework: "nextjs"` and `buildCommand: "npm run build"`.
-The project (`tinakuobooks` under `mhuang74s-projects`) runs Node 22.x;
-`.vercel/` is gitignored.
+`vercel.json` sets `framework: "nextjs"`,
+`installCommand: "pnpm install --frozen-lockfile"`, and
+`buildCommand: "pnpm run build"`. The project (`tinakuobooks` under
+`mhuang74s-projects`) runs Node 22.x; `.vercel/` is gitignored.
 
 `www.tinakuobooks.com` still resolves to the `gh-pages` branch until the DNS
-cutover, so the static export in that branch stays live. The Pages workflow
-that used to rebuild it has been removed; do not re-add `postbuild` or an
-`out/` publish step.
+cutover, so the static export in that branch stays live. Do not re-add
+`postbuild` or an `out/` publish step.
 
 ## Licence
 

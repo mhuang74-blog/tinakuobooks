@@ -14,7 +14,6 @@ export type Work = {
   authorId: AuthorId
   collectionId: CollectionId
   cover: string
-  featured: boolean
   title: Localized<string>
   description: Localized<string>
   body: Localized<string>
@@ -32,7 +31,6 @@ type ZhFrontMatter = {
   author: AuthorId
   collection: CollectionId
   cover: string
-  featured?: boolean
 }
 
 type EnFrontMatter = {
@@ -82,7 +80,6 @@ function loadWorks(): Work[] {
       authorId: zh.author,
       collectionId: zh.collection,
       cover: String(zh.cover),
-      featured: zh.featured === true,
       title: {
         zh: String(zh.title),
         en: en?.title?.trim() || String(zh.title),
@@ -122,11 +119,6 @@ export function getWorkBySlug(slug: string): Work | undefined {
 
 export function getWorkBySlugEn(slugEn: string): Work | undefined {
   return getAllWorks().find((work) => work.slugEn === slugEn)
-}
-
-export function getFeaturedWork(): Work {
-  const works = getAllWorks()
-  return works.find((work) => work.featured) ?? works[0]
 }
 
 export function getWorksByCollection(id: CollectionId): Work[] {
