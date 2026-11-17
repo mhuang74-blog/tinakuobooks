@@ -73,7 +73,7 @@ test.describe('Chinese site', () => {
 
   test('custom 404 page renders', async ({ page }) => {
     const response = await page.goto('/404')
-    expect(response?.status()).toBe(200)
+    expect(response?.status()).toBe(404)
     await expect(page.locator('[data-custom-404]')).toBeVisible()
     await expect(
       page.getByRole('heading', { level: 1, name: '找不到頁面' }),

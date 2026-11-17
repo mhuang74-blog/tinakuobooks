@@ -18,3 +18,7 @@ test-results/
 
 # TypeScript
 *.tsbuildinfo
+
+# Vercel
+.vercel
+.env*
