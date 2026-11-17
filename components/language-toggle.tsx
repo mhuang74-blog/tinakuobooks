@@ -76,7 +76,7 @@ export function LanguageToggle({ locale, pairs }: Props) {
       <span
         aria-disabled="true"
         title={strings.languageToggleUnavailable}
-        className="inline-flex h-9 items-center rounded-full border border-line px-3 text-xs tracking-[0.12em] text-ink-muted/70"
+        className="lang-btn"
       >
         {target === 'en' ? 'EN' : '中文'}
       </span>
@@ -91,7 +91,7 @@ export function LanguageToggle({ locale, pairs }: Props) {
       aria-label={
         target === 'en' ? strings.languageToggleToEnglish : '切換到中文版'
       }
-      className="u-focus inline-flex h-9 items-center rounded-full border border-line px-3 text-xs font-medium tracking-[0.12em] text-ink-muted transition-colors hover:border-shell hover:text-shell"
+      className="lang-btn"
     >
       {target === 'en' ? 'EN' : '中文'}
     </a>

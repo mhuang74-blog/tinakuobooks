@@ -3,11 +3,10 @@ import { notFound } from 'next/navigation'
 import { Breadcrumbs } from '@/components/breadcrumbs'
 import { JsonLd } from '@/components/json-ld'
 import { WorksGrid } from '@/components/works-grid'
-import { collections, isCollectionId } from '@/content/collections'
-import { getWorksByCollection } from '@/lib/works'
-import { breadcrumbJsonLd, buildMetadata, collectionJsonLd } from '@/lib/seo'
+import { collections, getCollection, isCollectionId } from '@/content/collections'
 import { collectionHref, homeHref, ui, worksHref } from '@/lib/i18n'
-import { getCollection } from '@/content/collections'
+import { breadcrumbJsonLd, buildMetadata, collectionJsonLd } from '@/lib/seo'
+import { getWorksByCollection } from '@/lib/works'
 
 export const dynamicParams = false
 
@@ -43,11 +42,7 @@ export async function generateMetadata({
   })
 }
 
-export default async function CollectionPage({
-  params,
-}: {
-  params: Promise<Params>
-}) {
+export default async function CollectionPage({ params }: { params: Promise<Params> }) {
   const { slug } = await params
   if (!isCollectionId(slug)) notFound()
 
@@ -55,7 +50,7 @@ export default async function CollectionPage({
   const works = getWorksByCollection(slug)
 
   return (
-    <div className="u-container pt-8">
+    <>
       <JsonLd data={collectionJsonLd(collection, works, 'zh')} />
       <JsonLd
         data={breadcrumbJsonLd([
@@ -65,37 +60,40 @@ export default async function CollectionPage({
         ])}
       />
 
-      <Breadcrumbs
-        items={[
-          { label: strings.home, href: homeHref('zh'), legacy: true },
-          { label: strings.navCollections, href: '/collections', legacy: false },
-          { label: collection.name.zh },
-        ]}
-      />
-
-      <header className="mt-8 max-w-2xl">
-        <span
-          aria-hidden="true"
-          className="block h-1 w-16 rounded-full"
-          style={{ backgroundColor: collection.accent }}
+      <div className="wrap detail-crumbs">
+        <Breadcrumbs
+          items={[
+            { label: strings.home, href: homeHref('zh'), legacy: true },
+            { label: strings.navCollections, href: '/collections', legacy: false },
+            { label: collection.name.zh },
+          ]}
         />
-        <h1 className="u-display mt-4 text-4xl">{collection.name.zh}</h1>
-        <p className="mt-3 text-lg text-ink-muted">{collection.description.zh}</p>
-        <p className="mt-2 text-sm text-ink-muted">{strings.workCount(works.length)}</p>
-      </header>
-
-      <div className="mt-10">
-        <WorksGrid works={works} locale="zh" linkMode="legacy" emptyMessage="這個主題還沒有作品。" />
       </div>
 
-      <p className="mt-12">
-        <a
-          href={worksHref('zh')}
-          className="u-focus text-sm font-medium text-shell hover:underline"
-        >
+      <header className="wrap page-head">
+        <p className="eyebrow" style={{ color: collection.accent }}>
+          {strings.collectionsKicker}
+        </p>
+        <h1 className="page-title">{collection.name.zh}</h1>
+        <p className="page-lead">{collection.description.zh}</p>
+        <p className="page-meta">{strings.workCount(works.length)}</p>
+      </header>
+
+      <div className="wrap page-body">
+        <WorksGrid
+          works={works}
+          locale="zh"
+          linkMode="legacy"
+          emptyTitle={strings.emptyTitle}
+          emptyBody={strings.emptyBody}
+        />
+      </div>
+
+      <div className="wrap page-back">
+        <a className="link-btn" href={worksHref('zh')}>
           ← {strings.allWorks}
         </a>
-      </p>
-    </div>
+      </div>
+    </>
   )
 }

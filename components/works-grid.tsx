@@ -7,20 +7,22 @@ type Props = {
   works: Work[]
   locale: Locale
   linkMode: 'legacy' | 'next'
-  emptyMessage?: string
+  emptyTitle?: string
+  emptyBody?: string
 }
 
-export function WorksGrid({ works, locale, linkMode, emptyMessage }: Props) {
+export function WorksGrid({ works, locale, linkMode, emptyTitle, emptyBody }: Props) {
   if (works.length === 0) {
     return (
-      <p className="rounded-2xl border border-dashed border-line bg-surface p-8 text-center text-sm text-ink-muted">
-        {emptyMessage ?? '—'}
-      </p>
+      <div className="shelf-empty">
+        <p className="empty-title">{emptyTitle ?? '—'}</p>
+        {emptyBody ? <p className="empty-body">{emptyBody}</p> : null}
+      </div>
     )
   }
 
   return (
-    <div className="grid gap-6 md:grid-cols-2 xl:grid-cols-3">
+    <div className="shelf">
       {works.map((work) => (
         <WorkCard
           key={work.slug}

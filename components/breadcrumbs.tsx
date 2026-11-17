@@ -13,20 +13,16 @@ type Props = {
 export function Breadcrumbs({ items }: Props) {
   return (
     <nav aria-label="Breadcrumb">
-      <ol className="flex flex-wrap items-center gap-2 text-xs text-ink-muted">
+      <ol className="crumbs">
         {items.map((item, index) => {
           const isCurrent = index === items.length - 1
           return (
-            <li key={`${item.label}-${index}`} className="flex items-center gap-2">
+            <li key={`${item.label}-${item.href ?? "current"}`}>
               {item.href && !isCurrent ? (
                 item.legacy ? (
-                  <a href={item.href} className="u-focus hover:text-shell">
-                    {item.label}
-                  </a>
+                  <a href={item.href}>{item.label}</a>
                 ) : (
-                  <Link href={item.href} className="u-focus hover:text-shell">
-                    {item.label}
-                  </Link>
+                  <Link href={item.href}>{item.label}</Link>
                 )
               ) : (
                 <span aria-current={isCurrent ? 'page' : undefined}>{item.label}</span>

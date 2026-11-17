@@ -45,6 +45,8 @@ content/
   collections.ts              the five collections (names, descriptions, covers, accents)
   authors.ts                  author profiles
   about.ts                    about copy for the home teaser and the about pages
+  portfolio.ts                home presentation data: shelf order, tags, cover art,
+                              reader notes, excerpts, and all home-page copy
 ```
 
 - Pairing is by filename. `content/works/en/57號小豹.md` is the English version
@@ -53,8 +55,9 @@ content/
   `Asia/Taipei` so server and client render the same date.
 - The Chinese filename is the legacy public URL (`/<slug>`); never rename it
   without adding a redirect at the hosting layer.
-- `featured: true` on exactly one work drives the homepage hero. Move the flag
-  to change the hero.
+- `featuredSlug` in `content/portfolio.ts` chooses the homepage hero and dialog
+  entry. `portfolioWorks` order is the shelf order (newest first) and must cover
+  every work; `scripts/validate-content.ts` fails when a slug is missing.
 
 ### Missing or partial translations
 

@@ -7,6 +7,7 @@ import {
   useEffect,
   useRef,
   useState,
+  type CSSProperties,
   type ReactNode,
 } from 'react'
 import { CloseIcon } from '@/components/icons'
@@ -18,6 +19,8 @@ type SubscribeContextValue = {
 }
 
 const SubscribeContext = createContext<SubscribeContextValue | null>(null)
+
+const iconStyle = { '--od-icon-size': '18px' } as CSSProperties
 
 export function useSubscribe(): SubscribeContextValue {
   const context = useContext(SubscribeContext)
@@ -69,28 +72,24 @@ export function SubscribeProvider({ locale, children }: ProviderProps) {
         onClick={(event) => {
           if (event.target === dialogRef.current) closeSubscribe()
         }}
-        className="m-auto w-[min(32rem,calc(100vw-2rem))] rounded-2xl border border-line bg-surface p-0 text-ink shadow-xl backdrop:bg-ink/40"
+        className="subscribe-dialog"
       >
-        <div className="relative p-6 sm:p-8">
+        <div className="dialog-inner">
           <button
             type="button"
             onClick={closeSubscribe}
             aria-label={strings.close}
-            className="u-focus absolute right-4 top-4 inline-flex h-9 w-9 items-center justify-center rounded-full border border-line text-ink-muted hover:text-shell"
+            className="dialog-close"
           >
-            <CloseIcon />
+            <CloseIcon className="od-icon" style={iconStyle} />
           </button>
 
-          <h2 id="subscribe-title" className="u-display pr-10 text-2xl">
+          <h2 id="subscribe-title" className="dialog-title">
             {strings.subscribeTitle}
           </h2>
-          <p className="mt-2 text-sm leading-relaxed text-ink-muted">
-            {strings.subscribeDescription}
-          </p>
+          <p className="dialog-blurb">{strings.subscribeDescription}</p>
 
-          <div className="mt-6">
-            <NewsletterForm locale={locale} />
-          </div>
+          <NewsletterForm locale={locale} />
         </div>
       </dialog>
     </SubscribeContext.Provider>
@@ -106,7 +105,7 @@ type ButtonProps = {
 export function SubscribeButton({ locale, className, label }: ButtonProps) {
   const { openSubscribe } = useSubscribe()
   return (
-    <button type="button" onClick={openSubscribe} className={className ?? 'u-focus'}>
+    <button type="button" onClick={openSubscribe} className={className}>
       {label ?? ui[locale].subscribe}
     </button>
   )

@@ -1,6 +1,6 @@
 import type { Metadata } from 'next'
 import type { ReactNode } from 'react'
-import { Fraunces, Inter } from 'next/font/google'
+import Script from 'next/script'
 import { SiteScripts } from '@/components/site-scripts'
 import { SiteShell } from '@/components/site-shell'
 import {
@@ -10,18 +10,6 @@ import {
   SITE_URL,
 } from '@/lib/site'
 import '../globals.css'
-
-const fraunces = Fraunces({
-  subsets: ['latin'],
-  display: 'swap',
-  variable: '--font-fraunces',
-})
-
-const inter = Inter({
-  subsets: ['latin'],
-  display: 'swap',
-  variable: '--font-inter',
-})
 
 export const metadata: Metadata = {
   metadataBase: new URL(SITE_URL),
@@ -49,8 +37,11 @@ export const metadata: Metadata = {
 
 export default function ZhRootLayout({ children }: { children: ReactNode }) {
   return (
-    <html lang="zh-Hant" className={`${fraunces.variable} ${inter.variable}`}>
+    <html lang="zh-Hant">
       <body className="min-h-screen bg-paper text-ink">
+        <Script id="js-flag" strategy="beforeInteractive">
+          {`document.documentElement.classList.add('js')`}
+        </Script>
         <SiteShell locale="zh">{children}</SiteShell>
         <SiteScripts />
       </body>

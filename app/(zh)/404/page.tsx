@@ -18,44 +18,23 @@ export const metadata: Metadata = {
 
 export default function NotFoundPage() {
   return (
-    <div
-      data-custom-404
-      className="u-container flex min-h-[60vh] flex-col justify-center py-16"
-    >
-      <p className="u-display text-7xl text-shell">404</p>
-      <h1 className="u-display mt-4 text-3xl">{strings.notFoundTitle}</h1>
-      <p className="mt-3 max-w-xl text-base leading-relaxed text-ink-muted">
-        {strings.notFoundBody}
-      </p>
-      <p className="mt-1 max-w-xl text-sm text-ink-muted">
-        Page not found. 這個頁面不存在。
-      </p>
+    <div data-custom-404 className="wrap not-found">
+      <p className="not-found-code">404</p>
+      <h1 className="page-title">{strings.notFoundTitle}</h1>
+      <p className="page-lead">{strings.notFoundBody}</p>
+      <p className="page-meta">Page not found. 這個頁面不存在。</p>
 
-      <div className="mt-8 flex flex-wrap gap-3">
-        <a
-          href="/"
-          className="u-focus inline-flex h-11 items-center rounded-full bg-shell px-5 text-sm font-medium text-white transition-colors hover:bg-ink"
-        >
+      <div className="page-cta">
+        <a className="btn btn-primary" href="/">
           {strings.backHome}
         </a>
-        <Link
-          href="/works"
-          className="u-focus inline-flex h-11 items-center rounded-full border border-line bg-surface px-5 text-sm font-medium text-ink transition-colors hover:border-shell hover:text-shell"
-        >
+        <Link className="btn btn-ghost" href="/works">
           {strings.browseWorks}
         </Link>
-        <a
-          href="/en"
-          hrefLang="en"
-          className="u-focus inline-flex h-11 items-center rounded-full border border-line bg-surface px-5 text-sm font-medium text-ink transition-colors hover:border-shell hover:text-shell"
-        >
+        <a className="btn btn-ghost" href="/en" hrefLang="en">
           English
         </a>
-        <Link
-          href="/en/works"
-          hrefLang="en"
-          className="u-focus inline-flex h-11 items-center rounded-full border border-line bg-surface px-5 text-sm font-medium text-ink transition-colors hover:border-shell hover:text-shell"
-        >
+        <Link className="btn btn-ghost" href="/en/works" hrefLang="en">
           English works
         </Link>
       </div>

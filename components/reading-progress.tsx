@@ -1,23 +1,38 @@
 'use client'
 
-import { motion, useReducedMotion, useScroll, useSpring } from 'motion/react'
+import { useEffect, useRef } from 'react'
 
 export function ReadingProgress() {
-  const reduceMotion = useReducedMotion()
-  const { scrollYProgress } = useScroll()
-  const scaleX = useSpring(scrollYProgress, {
-    stiffness: 120,
-    damping: 30,
-    restDelta: 0.001,
-  })
+  const barRef = useRef<HTMLDivElement>(null)
 
-  if (reduceMotion) return null
+  useEffect(() => {
+    const bar = barRef.current
+    if (!bar) return
 
-  return (
-    <motion.div
-      aria-hidden="true"
-      style={{ scaleX }}
-      className="fixed inset-x-0 top-0 z-50 h-0.5 origin-left bg-shell"
-    />
-  )
+    const media = window.matchMedia('(prefers-reduced-motion: reduce)')
+
+    const update = () => {
+      const max = document.documentElement.scrollHeight - window.innerHeight
+      const progress = max > 0 ? Math.min(1, Math.max(0, window.scrollY / max)) : 0
+      bar.style.transform = `scaleX(${progress})`
+    }
+
+    const sync = () => {
+      bar.hidden = media.matches
+      if (!media.matches) update()
+    }
+
+    sync()
+    media.addEventListener('change', sync)
+    window.addEventListener('scroll', update, { passive: true })
+    window.addEventListener('resize', update)
+
+    return () => {
+      media.removeEventListener('change', sync)
+      window.removeEventListener('scroll', update)
+      window.removeEventListener('resize', update)
+    }
+  }, [])
+
+  return <div ref={barRef} className="reading-progress" aria-hidden="true" style={{ transform: 'scaleX(0)' }} />
 }

@@ -1,21 +1,78 @@
 import { expect, test } from '@playwright/test'
 
-test.describe('Chinese site', () => {
-  test('home shows the featured work and six latest works', async ({ page }) => {
+test.describe('Chinese home', () => {
+  test('renders the hero, featured work, and the ten-work shelf', async ({ page }) => {
     const response = await page.goto('/')
     expect(response?.status()).toBe(200)
 
+    await expect(page.getByRole('heading', { level: 1, name: '郭瀞婷' })).toBeVisible()
+    await expect(page.locator('aside.feature')).toBeVisible()
     await expect(
-      page.getByRole('heading', { level: 1, name: '讓故事延伸下去' }),
-    ).toBeVisible()
-    await expect(
-      page.getByRole('heading', { name: '57號小豹', exact: true }),
+      page.locator('aside.feature').getByRole('heading', { level: 2, name: '《暗號偵探社》' }),
     ).toBeVisible()
 
-    const latest = page.locator('section[aria-label="最新作品"] article')
-    await expect(latest).toHaveCount(6)
+    await expect(page.locator('.shelf article')).toHaveCount(10)
+    await expect(page.locator('#result-count')).toHaveText('共 10 部作品')
   })
 
+  test('filters the shelf and resets it', async ({ page }) => {
+    await page.goto('/')
+
+    await page.getByRole('button', { name: '繪本', exact: true }).click()
+    await expect(page.locator('#result-count')).toHaveText('顯示 1 部，共 10 部')
+    await expect(page.locator('.shelf article')).toHaveCount(1)
+
+    await page.getByRole('button', { name: '重置篩選' }).click()
+    await expect(page.locator('#result-count')).toHaveText('共 10 部作品')
+    await expect(page.locator('.shelf article')).toHaveCount(10)
+  })
+
+  test('opens a work dialog, shows facts, and restores focus on Escape', async ({ page }) => {
+    await page.goto('/')
+
+    const trigger = page.getByRole('button', { name: '查看《57號小豹》的介紹' })
+    await trigger.click()
+
+    const dialog = page.getByRole('dialog', { name: '《57號小豹》' })
+    await expect(dialog).toBeVisible()
+    await expect(dialog.locator('.fact-list dd')).toHaveCount(4)
+    await expect(dialog.locator('.fact-list')).toContainText('繪本')
+
+    await page.keyboard.press('Escape')
+    await expect(dialog).toBeHidden()
+    await expect(trigger).toBeFocused()
+  })
+
+  test('inquiry form validates, submits, and resets', async ({ page }) => {
+    await page.goto('/')
+
+    await page.locator('#f-message').fill('短短')
+    await page.locator('#f-message').blur()
+    await expect(page.locator('#f-message-error')).toBeVisible()
+
+    await page.locator('#form-submit').click()
+    await expect(page.locator('#summary-list a')).toHaveCount(4)
+    await expect(page.locator('#f-name')).toBeFocused()
+
+    await page.locator('#f-name').fill('林小姐')
+    await page.locator('#f-topic').selectOption('rights')
+    await page.locator('#f-email').fill('reader@example.com')
+    await page.locator('#f-message').fill('想請教《57號小豹》的授權方式，謝謝。')
+    await page.locator('#form-submit').click()
+
+    const success = page.locator('#form-success')
+    await expect(success).toBeVisible()
+    await expect(success.getByRole('heading', { name: '信已經放在桌上了' })).toBeFocused()
+    await expect(success).toContainText('林小姐')
+
+    await page.getByRole('button', { name: '再寫一封' }).click()
+    await expect(page.locator('#inquiry-form')).toBeVisible()
+    await expect(page.locator('#form-success')).toBeHidden()
+    await expect(page.locator('#f-name')).toBeFocused()
+  })
+})
+
+test.describe('Chinese site', () => {
   test('works index searches, filters, sorts, and syncs the URL', async ({ page }) => {
     await page.goto('/works')
 
@@ -31,7 +88,7 @@ test.describe('Chinese site', () => {
     await page.getByRole('button', { name: '清除篩選' }).click()
     await expect(status).toHaveText('11 件作品')
 
-    await page.getByRole('button', { name: /繪本/ }).click()
+    await page.getByRole('button', { name: '繪本', exact: true }).click()
     await expect(status).toHaveText('1 件作品')
     await expect(page.locator('main article')).toHaveCount(1)
     await expect(page).toHaveURL(/collection=picture-book/)
@@ -39,16 +96,15 @@ test.describe('Chinese site', () => {
     await page.getByLabel('排序').selectOption('title')
     await expect(page).toHaveURL(/sort=title/)
 
-    await page.getByRole('button', { name: '全部' }).click()
+    await page.getByRole('button', { name: '全部', exact: true }).click()
     await expect(status).toHaveText('11 件作品')
     await expect(page.locator('main article')).toHaveCount(11)
   })
 
   test('work page links to its English counterpart', async ({ page }) => {
     await page.goto('/57號小豹')
-    await expect(
-      page.getByRole('heading', { level: 1, name: '57號小豹' }),
-    ).toBeVisible()
+    await expect(page.getByRole('heading', { level: 1, name: '57號小豹' })).toBeVisible()
+    await expect(page.locator('#contents')).toContainText('作品內容')
 
     await page.getByRole('link', { name: '切換到英文版' }).click()
     await expect(page).toHaveURL(/\/en\/works\/little-leopard-no-57$/)
@@ -75,9 +131,7 @@ test.describe('Chinese site', () => {
     const response = await page.goto('/404')
     expect(response?.status()).toBe(200)
     await expect(page.locator('[data-custom-404]')).toBeVisible()
-    await expect(
-      page.getByRole('heading', { level: 1, name: '找不到頁面' }),
-    ).toBeVisible()
+    await expect(page.getByRole('heading', { level: 1, name: '找不到頁面' })).toBeVisible()
   })
 
   test('subscribe dialog opens, contains the Mailchimp form, and closes on Escape', async ({
@@ -95,38 +149,51 @@ test.describe('Chinese site', () => {
     await expect(dialog).toBeHidden()
   })
 
-  test('mobile menu keeps focus inside and restores it on Escape', async ({ page }) => {
+  test('mobile menu toggles, closes on Escape, and restores focus', async ({ page }) => {
     await page.setViewportSize({ width: 375, height: 812 })
     await page.goto('/')
 
-    const trigger = page.getByRole('button', { name: '開啟選單' })
+    const trigger = page.getByRole('button', { name: '選單', exact: true })
+    await expect(trigger).toHaveAttribute('aria-expanded', 'false')
+
     await trigger.click()
-    const dialog = page.getByRole('dialog', { name: '選單' })
-    await expect(dialog).toBeVisible()
-    await expect(dialog.getByRole('button', { name: '關閉選單' })).toBeFocused()
-
-    await page.keyboard.press('Shift+Tab')
-    expect(
-      await page.evaluate(() => {
-        const panel = document.querySelector('#mobile-menu')
-        const focusables = panel
-          ? [...panel.querySelectorAll<HTMLElement>('a[href], button:not([disabled])')]
-          : []
-        return panel?.contains(document.activeElement) &&
-          document.activeElement === focusables[focusables.length - 1]
-      }),
-    ).toBe(true)
-
-    await page.keyboard.press('Tab')
-    await expect(dialog.getByRole('button', { name: '關閉選單' })).toBeFocused()
+    await expect(trigger).toHaveAttribute('aria-expanded', 'true')
+    const panel = page.locator('#mobile-menu')
+    await expect(panel).toBeVisible()
 
     await page.keyboard.press('Escape')
-    await expect(dialog).toBeHidden()
+    await expect(panel).toBeHidden()
     await expect(trigger).toBeFocused()
+  })
+
+  test('mobile menu closes after choosing a section', async ({ page }) => {
+    await page.setViewportSize({ width: 375, height: 812 })
+    await page.goto('/')
+
+    const trigger = page.getByRole('button', { name: '選單', exact: true })
+    await trigger.click()
+    const panel = page.locator('#mobile-menu')
+    await panel.getByRole('link', { name: '作品', exact: true }).click()
+    await expect(panel).toBeHidden()
+    await expect(trigger).toHaveAttribute('aria-expanded', 'false')
   })
 })
 
 test.describe('English site', () => {
+  test('home renders the mirrored portfolio and opens a dialog', async ({ page }) => {
+    const response = await page.goto('/en')
+    expect(response?.status()).toBe(200)
+
+    await expect(page.getByRole('heading', { level: 1, name: 'Tina Kuo' })).toBeVisible()
+    await expect(page.locator('.shelf article')).toHaveCount(10)
+
+    await page.getByRole('button', { name: 'Open The Secret Code Detective Club' }).click()
+    const dialog = page.getByRole('dialog', { name: 'The Secret Code Detective Club' })
+    await expect(dialog).toBeVisible()
+    await page.keyboard.press('Escape')
+    await expect(dialog).toBeHidden()
+  })
+
   test('works index searches and filters', async ({ page }) => {
     await page.goto('/en/works')
 
@@ -139,7 +206,7 @@ test.describe('English site', () => {
     await expect(page.locator('main article')).toHaveCount(2)
 
     await page.getByRole('button', { name: 'Clear filters' }).click()
-    await page.getByRole('button', { name: /Picture Book/ }).click()
+    await page.getByRole('button', { name: 'Picture Book', exact: true }).click()
     await expect(status).toHaveText('1 work')
     await expect(page.locator('main article')).toHaveCount(1)
   })

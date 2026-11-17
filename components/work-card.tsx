@@ -1,5 +1,7 @@
 import Link from 'next/link'
-import { formatDate, ui, type Locale } from '@/lib/i18n'
+import type { CSSProperties, ReactNode } from 'react'
+import { ArrowIcon } from '@/components/icons'
+import { ui, type Locale } from '@/lib/i18n'
 import type { WorkCardData } from '@/lib/work-card'
 
 type Props = {
@@ -8,57 +10,59 @@ type Props = {
   linkMode: 'legacy' | 'next'
 }
 
+type CardLinkProps = {
+  href: string
+  className: string
+  ariaLabel: string
+  legacy: boolean
+  children: ReactNode
+}
+
+function CardLink({ href, className, ariaLabel, legacy, children }: CardLinkProps) {
+  return legacy ? (
+    <a href={href} className={className} aria-label={ariaLabel}>
+      {children}
+    </a>
+  ) : (
+    <Link href={href} className={className} aria-label={ariaLabel}>
+      {children}
+    </Link>
+  )
+}
+
 export function WorkCard({ work, locale, linkMode }: Props) {
   const strings = ui[locale]
-
-  const body = (
-    <>
-      <div className="overflow-hidden rounded-xl bg-paper-deep">
-        <img
-          src={work.cover}
-          alt=""
-          loading="lazy"
-          decoding="async"
-          className="h-full w-full object-contain p-3 transition-transform duration-500 motion-reduce:transform-none group-hover:scale-[1.02]"
-        />
-      </div>
-
-      <div className="min-w-0">
-        <p
-          className="u-eyebrow"
-          style={{ color: work.collectionAccent }}
-        >
-          {work.collectionName}
-        </p>
-        <h3 className="u-display mt-2 text-xl leading-snug">{work.title}</h3>
-        <p className="mt-2 line-clamp-3 text-sm leading-relaxed text-ink-muted">
-          {work.description}
-        </p>
-        <p className="mt-4 flex flex-wrap gap-x-3 gap-y-1 text-xs text-ink-muted">
-          <span>{work.authorName}</span>
-          <span aria-hidden="true">·</span>
-          <span>{formatDate(work.date, locale)}</span>
-          <span aria-hidden="true">·</span>
-          <span>{strings.readingTime(work.readingMinutes)}</span>
-        </p>
-      </div>
-    </>
-  )
-
-  const className =
-    'group grid h-full gap-5 rounded-2xl border border-line bg-surface p-4 transition-all hover:-translate-y-1 hover:border-shell/40 hover:shadow-lg motion-reduce:hover:translate-y-0'
+  const legacy = linkMode === 'legacy'
+  const readAria = `${strings.readWork} ${work.title}`
 
   return (
-    <article className="h-full [&>a]:md:grid-cols-[8rem_1fr]">
-      {linkMode === 'next' ? (
-        <Link href={work.href} className={className}>
-          {body}
-        </Link>
-      ) : (
-        <a href={work.href} className={className}>
-          {body}
-        </a>
-      )}
+    <article className="book-card">
+      <CardLink href={work.href} className="cover-link" ariaLabel={readAria} legacy={legacy}>
+        <span className="cover-frame">
+          <img
+            className="cover-img"
+            src={work.art.src}
+            width={work.art.width}
+            height={work.art.height}
+            alt={work.bookTitle}
+            loading="lazy"
+            decoding="async"
+          />
+        </span>
+      </CardLink>
+
+      <div className="book-meta">
+        <p className="book-tags">
+          <span className="tag-chip od-nowrap">{work.collectionName}</span>
+          <span className="book-genre">{work.year}</span>
+        </p>
+        <h3 className="book-title">{work.bookTitle}</h3>
+        <p className="book-line">{work.tagline}</p>
+        <CardLink href={work.href} className="link-btn" ariaLabel={readAria} legacy={legacy}>
+          {strings.readWork}
+          <ArrowIcon className="od-icon" style={{ '--od-icon-size': '14px' } as CSSProperties} />
+        </CardLink>
+      </div>
     </article>
   )
 }

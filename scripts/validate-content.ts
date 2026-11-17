@@ -3,7 +3,8 @@ import path from 'node:path'
 import matter from 'gray-matter'
 import { isCollectionId } from '@/content/collections'
 import { isAuthorId } from '@/content/authors'
-import { getAllWorks } from '@/lib/works'
+import { coloringBook, featuredSlug, portfolioWorks } from '@/content/portfolio'
+import { getAllWorks, getWorkBySlug } from '@/lib/works'
 
 const ROOT = process.cwd()
 const WORKS_ROOT = path.join(ROOT, 'content', 'works')
@@ -41,7 +42,6 @@ if (zhFiles.length === 0) errors.push('content/works/zh is empty')
 const enByLegacySlug = new Map(enFiles.map((file) => [file.replace(MARKDOWN, ''), file]))
 
 const seenSlugEn = new Map<string, string>()
-let featuredCount = 0
 
 for (const file of zhFiles) {
   const legacySlug = file.replace(MARKDOWN, '')
@@ -66,7 +66,6 @@ for (const file of zhFiles) {
     errors.push(`${label}: cover file not found in public: ${data.cover}`)
   }
   if (data.slug !== undefined) errors.push(`${label}: Chinese works must not define a slug`)
-  if (data.featured === true) featuredCount += 1
 
   checkBody(label, parsed.content)
 
@@ -107,17 +106,55 @@ for (const enFile of enFiles) {
   }
 }
 
-if (featuredCount > 1) errors.push(`${featuredCount} works are marked featured; expected at most 1`)
-
 const works = getAllWorks()
 const pending = works.filter((work) => work.translationPending)
-const featured = works.find((work) => work.featured)
+
+if (portfolioWorks.length !== 10) {
+  errors.push(`content/portfolio.ts: expected 10 portfolio works, found ${portfolioWorks.length}`)
+}
+
+const seenPortfolioSlug = new Set<string>()
+
+for (const entry of portfolioWorks) {
+  const label = `content/portfolio.ts: ${entry.slug}`
+
+  if (seenPortfolioSlug.has(entry.slug)) errors.push(`${label}: duplicate slug`)
+  seenPortfolioSlug.add(entry.slug)
+
+  const work = getWorkBySlug(entry.slug)
+  if (!work) {
+    errors.push(`${label}: no matching work in content/works/zh`)
+  } else if (entry.category !== work.collectionId) {
+    errors.push(
+      `${label}: category ${entry.category} does not match collection ${work.collectionId}`,
+    )
+  }
+
+  if (!fs.existsSync(path.join(ROOT, 'public', entry.art.src))) {
+    errors.push(`${label}: art not found in public: ${entry.art.src}`)
+  }
+}
+
+if (!seenPortfolioSlug.has(featuredSlug)) {
+  errors.push(`content/portfolio.ts: featuredSlug ${featuredSlug} is not a portfolio work`)
+}
+
+const coloringWork = getWorkBySlug(coloringBook.slug)
+if (!coloringWork) {
+  errors.push(`content/portfolio.ts: coloring book work not found: ${coloringBook.slug}`)
+}
+if (!fs.existsSync(path.join(ROOT, 'public', coloringBook.art.src))) {
+  errors.push(`content/portfolio.ts: coloring book art not found: ${coloringBook.art.src}`)
+}
+if (!fs.existsSync(path.join(ROOT, 'public', coloringBook.pdf))) {
+  errors.push(`content/portfolio.ts: coloring book PDF not found: ${coloringBook.pdf}`)
+}
 
 for (const warning of warnings) console.warn(`warn  ${warning}`)
 for (const error of errors) console.error(`error ${error}`)
 
 console.log(
-  `content: ${works.length} works, ${pending.length} translation-pending, featured: ${featured?.slug ?? 'none'}`,
+  `content: ${works.length} works, ${pending.length} translation-pending, portfolio: ${portfolioWorks.length} works, featured: ${featuredSlug}`,
 )
 
 if (errors.length > 0) {
